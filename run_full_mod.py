@@ -11,6 +11,7 @@ __email__ = ["Robbin.Bouwmeester@ugent.be", "Ralf.Gabriels@ugent.be"]
 import os
 import sys
 import time
+import json
 
 
 import hashlib
@@ -38,20 +39,21 @@ config = ConfigProto()
 config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 
+param_history = {}
 
 def run():
-    
-    a_blocks=[3]
-    a_kernel=[2,4,8]
+
+    a_blocks=[2, 3]
+    a_kernel=[2, 4, 8]
     a_max_pool=[2]
-    a_filters_start=[256]
+    a_filters_start=[128, 256, 1024]
     a_stride=[1]
-    b_blocks=[2]
-    b_kernel=[2]
+    b_blocks=[2, 3]
+    b_kernel=[2, 4, 8]
     b_max_pool=[2]
-    b_filters_start=[128]
+    b_filters_start=[128, 256, 1024]
     b_stride=[1]
-    global_neurons=[16]
+    global_neurons=[8, 16, 32]
     global_num_dens=[3]
     regularizer_val=[0.0000025]
 
@@ -86,7 +88,7 @@ def run():
     batch_size = 256
     ratio_test = 0.9
     ratio_valid = 0.95
-    sel_cols = ["seq","modifications","tr","index_name","predictions"]
+    sel_cols = ["seq", "modifications", "tr", "index_name", "predictions"]
     fit_hc = True
     use_correction_factor = True
     hc_str = "_hc"
@@ -100,8 +102,12 @@ def run():
 
         df = cnn_functions.get_feat_df(df,aa_comp=aa_comp)
 
-        if use_correction_factor: correction_factor = (df["tr"].max())/10.0 #*0.05
-        else: correction_factor = 1.0
+        if use_correction_factor:
+            correction_factor = (df["tr"].max())/10.0 #*0.05
+        else:
+            correction_factor = 1.0
+
+        # TODO K-FORD cross validation
 
         df_train,df_test = cnn_functions.train_test(df,ratio_train=ratio_test)
         df_train,df_valid = cnn_functions.train_test(df_train,ratio_train=ratio_valid)
@@ -114,12 +120,15 @@ def run():
         y_train = y_train/correction_factor
         y_valid = y_valid/correction_factor
         y_test = y_test/correction_factor
-        
+
         mods_optimized = []
-        
+
         for p in params:
-            a_blocks, a_kernel,a_max_pool,a_filters_start,a_stride,b_blocks,b_kernel,b_max_pool,b_filters_start,b_stride,global_neurons,global_num_dens,regularizer_val = p
+            a_blocks, a_kernel, a_max_pool, a_filters_start, a_stride, b_blocks, b_kernel, b_max_pool, b_filters_start, b_stride, global_neurons, global_num_dens, regularizer_val = p
             param_hash = hashlib.md5(",".join(map(str,p)).encode()).hexdigest()
+            param_history[param_hash] = p
+            json.dump(param_history, open("param_history.json", "w"))
+
             mod_name = "mods/full%s_%s_%s.hdf5" % (hc_str,dataset_name,param_hash)
 
             model = cnn_functions.init_model(X_train, X_train_sum, X_train_global,X_test_hc,
@@ -137,24 +146,24 @@ def run():
                                             global_num_dens=global_num_dens,
                                             regularizer_val=regularizer_val,
                                             fit_hc=fit_hc)
-            
+
             mcp_save = ModelCheckpoint(mod_name,
                                     save_best_only=True,
                                     monitor='val_mean_absolute_error',
                                     mode='min')
             if fit_hc:
-                history = model.fit([X_train,X_train_sum,X_train_global,X_train_hc], y_train, 
+                history = model.fit([X_train,X_train_sum,X_train_global,X_train_hc], y_train,
                                     validation_data=([X_valid,X_valid_sum,X_valid_global,X_valid_hc],y_valid),
-                                    epochs=n_epochs, 
-                                    verbose=1, 
+                                    epochs=n_epochs,
+                                    verbose=1,
                                     batch_size=batch_size,
                                     callbacks=[mcp_save],
                                     shuffle=True)
             else:
-                history = model.fit([X_train,X_train_sum,X_train_global], y_train, 
+                history = model.fit([X_train,X_train_sum,X_train_global], y_train,
                                     validation_data=([X_valid,X_valid_sum,X_valid_global],y_valid),
-                                    epochs=n_epochs, 
-                                    verbose=1, 
+                                    epochs=n_epochs,
+                                    verbose=1,
                                     batch_size=batch_size,
                                     callbacks=[mcp_save],
                                     shuffle=True)
@@ -163,83 +172,78 @@ def run():
                 file.write("correction_factor,%s\n" % (correction_factor))
                 file.write("hc,%s\n" % (fit_hc))
 
-            mods_optimized.append(load_model(mod_name,
-                                            custom_objects = {'<lambda>': lrelu}))
+            mods_optimized.append(load_model(mod_name, custom_objects={'<lambda>': lrelu}))
 
-        cnn_functions.write_preds(df_train.loc[:, sel_cols],
-                                    X_train,
-                                    X_train_sum,
-                                    X_train_global,
-                                    X_train_hc,
+
+            # Evaluate
+
+            cnn_functions.write_preds(df_train.loc[:, sel_cols],
+                                        X_train,
+                                        X_train_sum,
+                                        X_train_global,
+                                        X_train_hc,
+                                        mods_optimized,
+                                        fit_hc=fit_hc,
+                                        correction_factor=correction_factor,
+                                        outfile_name="predictions/%s_full%s_train_%s.csv" % (dataset_name, hc_str, param_hash))
+
+            cnn_functions.write_preds(df_valid.loc[:, sel_cols],
+                                    X_valid,
+                                    X_valid_sum,
+                                    X_valid_global,
+                                    X_valid_hc,
                                     mods_optimized,
                                     fit_hc=fit_hc,
                                     correction_factor=correction_factor,
-                                    outfile_name="predictions/%s_full%s_train.csv" % (dataset_name, hc_str))
+                                    outfile_name="predictions/%s_full%s_valid_%s.csv" % (dataset_name, hc_str, param_hash))
 
-        cnn_functions.write_preds(df_valid.loc[:, sel_cols],
-                                X_valid,
-                                X_valid_sum,
-                                X_valid_global,
-                                X_valid_hc,
-                                mods_optimized,
-                                fit_hc=fit_hc,
-                                correction_factor=correction_factor,
-                                outfile_name="predictions/%s_full%s_valid.csv" % (dataset_name, hc_str))
-                                
-        perf = cnn_functions.write_preds(df_test.loc[:, sel_cols],
-                                X_test,
-                                X_test_sum,
-                                X_test_global,
-                                X_test_hc,
-                                mods_optimized,
-                                fit_hc=fit_hc,
-                                correction_factor=correction_factor,
-                                outfile_name="predictions/%s_full%s_test.csv" % (dataset_name, hc_str))
-        
-        cnn_functions.plot_preds(X_test,
-                X_test_sum,
-                X_test_global,
-                X_test_hc,
-                y_test,
-                mods_optimized,
-                fit_hc=fit_hc,
-                correction_factor=correction_factor,
-                file_save="figures/%s_full_hc_test.png" % (dataset_name),
-                plot_title="%s_full%s_test" % (dataset_name,hc_str))
-        
-        cnn_functions.plot_preds(X_train,
-                X_train_sum,
-                X_train_global,
-                X_train_hc,
-                y_train,
-                mods_optimized,
-                fit_hc=fit_hc,
-                correction_factor=correction_factor,
-                file_save="figures/%s_full_hc_train.png" % (dataset_name),
-                plot_title="%s_full%s_train" % (dataset_name,hc_str))
-
-        cnn_functions.plot_preds(X_valid,
-                X_valid_sum,
-                X_valid_global,
-                X_valid_hc,
-                y_valid,
-                mods_optimized,
-                fit_hc=fit_hc,
-                correction_factor=correction_factor,
-                file_save="figures/%s_full_hc_valid.png" % (dataset_name),
-                plot_title="%s_full%s_valid" % (dataset_name,hc_str))
+            cnn_functions.write_preds(df_test.loc[:, sel_cols],
+                                    X_test,
+                                    X_test_sum,
+                                    X_test_global,
+                                    X_test_hc,
+                                    mods_optimized,
+                                    fit_hc=fit_hc,
+                                    correction_factor=correction_factor,
+                                    outfile_name="predictions/%s_full%s_test_%s.csv" % (dataset_name, hc_str, param_hash))
 
 
-        cnn_functions.plot_preds(X_test,
-                X_test_sum,
-                X_test_global,
-                X_test_hc,
-                y_test,
-                mods_optimized,
-                fit_hc=fit_hc,
-                correction_factor=correction_factor,
-                file_save="figures/%s_full_hc_test.png" % (dataset_name),
-                plot_title="%s_full%s_test" % (dataset_name,hc_str))
+
+
+            cnn_functions.plot_preds(X_test,
+                    X_test_sum,
+                    X_test_global,
+                    X_test_hc,
+                    y_test,
+                    mods_optimized,
+                    fit_hc=fit_hc,
+                    correction_factor=correction_factor,
+                    file_save="figures/%s_full_hc_test_%s.png" % (dataset_name, param_hash),
+                    plot_title="%s_full%s_test" % (dataset_name, hc_str))
+
+            cnn_functions.plot_preds(X_train,
+                    X_train_sum,
+                    X_train_global,
+                    X_train_hc,
+                    y_train,
+                    mods_optimized,
+                    fit_hc=fit_hc,
+                    correction_factor=correction_factor,
+                    file_save="figures/%s_full_hc_train_%s.png" % (dataset_name, param_hash),
+                    plot_title="%s_full%s_train" % (dataset_name, hc_str))
+
+            cnn_functions.plot_preds(X_valid,
+                    X_valid_sum,
+                    X_valid_global,
+                    X_valid_hc,
+                    y_valid,
+                    mods_optimized,
+                    fit_hc=fit_hc,
+                    correction_factor=correction_factor,
+                    file_save="figures/%s_full_hc_valid_%s.png" % (dataset_name, param_hash),
+                    plot_title="%s_full%s_valid" % (dataset_name, hc_str))
+
+
 
 if __name__ == "__main__":
 
