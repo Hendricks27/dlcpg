@@ -9,8 +9,8 @@
 #BSUB -n 10
 #BSUB -M 16GB
 #BSUB -gpu 'num=1:gmodel=TeslaV100_SXM2_32GB:j_exclusive=yes'
-#BSUB -o /storage1/fs1/d.goldfarb/Active/Projects/Wenjin/code/new_train/train.%J.log
-#BSUB -e /storage1/fs1/d.goldfarb/Active/Projects/Wenjin/code/new_train/train.%J.err
+#BSUB -o /storage1/fs1/d.goldfarb/Active/Projects/Wenjin/code/dlcpg/train.%J.log
+#BSUB -e /storage1/fs1/d.goldfarb/Active/Projects/Wenjin/code/dlcpg/train.%J.err
 
 
 

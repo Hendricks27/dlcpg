@@ -94,7 +94,8 @@ def run():
     hc_str = "_hc"
 
     datasets = [
-        "tinytest"
+        "fraction_df_0196_woo",
+        # "tinytest"
     ]
     for dataset_name in datasets:
         df = cnn_functions.read_infile("datasets/%s.csv" % (dataset_name))
