@@ -1,2 +1,0 @@
-correction_factor,1227.0
-hc,True
