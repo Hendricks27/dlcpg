@@ -180,14 +180,14 @@ for f in fragments:
             if newmass > max_mass:
                 continue
 
-            l = [f, "|".join(modstr_almost)]
+            l = [f, "|".join(modstr_almost), "%0.2f" % newmass]
             outputlines.append(",".join(l) + "\n")
 
 
 
 
 
-outputfile = open("human_library.csv", "w")
+outputfile = open("../../delivery/human_library.csv", "w")
 outputfile.write("seq,modifications\n")
 for l in sorted(outputlines):
     outputfile.write(l)
