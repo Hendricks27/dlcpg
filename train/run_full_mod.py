@@ -42,19 +42,19 @@ session = InteractiveSession(config=config)
 
 def run():
 
-    a_blocks=[2, 3]
-    a_kernel=[2, 4, 8]
-    a_max_pool=[2]
-    a_filters_start=[128, 256, 1024]
-    a_stride=[1]
-    b_blocks=[2, 3]
-    b_kernel=[2, 4, 8]
-    b_max_pool=[2]
-    b_filters_start=[128, 256, 1024]
-    b_stride=[1]
-    global_neurons=[8, 16, 32]
-    global_num_dens=[3]
-    regularizer_val=[0.0000025]
+    a_blocks = [2, 3] # Original value is 3. But 2 is perhaps better
+    a_kernel = [2, 4, 8]
+    a_max_pool = [2]
+    a_filters_start = [256]
+    a_stride = [1]
+    b_blocks = [2]
+    b_kernel = [2]
+    b_max_pool = [2]
+    b_filters_start = [128]
+    b_stride = [1]
+    global_neurons = [16]
+    global_num_dens = [3]
+    regularizer_val = [0.0000025]
 
     params = list(itertools.product(*[a_blocks,
                                         a_kernel,
