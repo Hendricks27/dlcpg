@@ -1,27 +1,30 @@
 import os
 import sys
 
-input_file = open("fraction_df_0196.csv")
+input_file = open("df0196.csv")
 
-
-init=True
-lines = []
+lines_rt = []
+lines_fr = []
 for l in input_file:
-    l = l.strip()
-    if init:
-        init = False
-        continue
 
-    seq, modtmp, fr, x = l.split(",")
-    # fr = float(fr)
+    seq, modtmp, oxinum, rt, fr = l.strip().split("\t")
+    # print(seq, modtmp, oxinum, rt, fr)
 
     newmod = ""
+    oxi = False
     if modtmp == "Unmodified":
         pass
     elif modtmp == "Acetyl (Protein N-term)":
         newmod = "0|Acetyl|"
     elif "Oxidation" in modtmp:
-        continue
+        if oxinum != "1":
+            continue
+        if seq.count("M") > 1:
+            continue
+        assert modtmp in ["Oxidation (M)", "Acetyl (Protein N-term);Oxidation (M)"]
+        if modtmp == "Acetyl (Protein N-term);Oxidation (M)":
+            newmod = "0|Acetyl|"
+        oxi = True
     else:
         print(modtmp)
 
@@ -37,17 +40,27 @@ for l in input_file:
         if aa == "C":
             newmod += "%s|Carbamidomethyl|" % pos
 
+        if aa == "M" and oxi:
+            newmod += "%s|Oxidation|" % pos
+
     newmod = newmod[:-1]
-    newl = ",".join([seq, newmod, fr])
-    lines.append(newl)
+
+    lines_rt.append(",".join([seq, newmod, rt]))
+    lines_fr.append(",".join([seq, newmod, fr]))
 
 
 
-lines.sort()
 
-output_file = open("../fraction_df_0196_woo.csv", "w")
+
+lines_rt.sort()
+lines_fr.sort()
+
+output_file = open("../d0196_fraction.csv", "w")
 output_file.write("seq,modifications,tr\n")
-for l in lines:
+for l in lines_fr:
     output_file.write(l + "\n")
 
-
+output_file = open("../d0196_retention.csv", "w")
+output_file.write("seq,modifications,tr\n")
+for l in lines_rt:
+    output_file.write(l + "\n")
