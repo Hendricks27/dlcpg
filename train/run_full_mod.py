@@ -93,7 +93,8 @@ def run():
     hc_str = "_hc"
 
     datasets = [
-        "fraction_df_0196_woo",
+        "d0196_retention",
+        "d0196_fraction",
         # "tinytest"
     ]
     for dataset_name in datasets:
@@ -127,9 +128,7 @@ def run():
             a_blocks, a_kernel, a_max_pool, a_filters_start, a_stride, b_blocks, b_kernel, b_max_pool, b_filters_start, b_stride, global_neurons, global_num_dens, regularizer_val = p
             param_hash = hashlib.md5(",".join(map(str,p)).encode()).hexdigest()
 
-            param_history_path = "./mod_para/%s.json" % param_hash
-            if os.path.exists(param_history_path):
-                continue
+            param_history_path = "./mod_para/%s.json" % (dataset_name+"_"+param_hash)
 
             json.dump(p, open(param_history_path, "w"))
 

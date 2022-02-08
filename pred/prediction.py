@@ -7,12 +7,13 @@ from deeplc import DeepLC, FeatExtractor
 
 
 if __name__ == "__main__":
-    peptide_file = "test.csv"
+
+    peptide_file = "human_library.csv"
 
     pep_df = pd.read_csv(peptide_file, sep=",")
     pep_df['modifications'] = pep_df['modifications'].fillna("")
 
-    calibration_file = "fraction_df_0196_woo.csv"
+    calibration_file = "d0196_fraction.csv"
     cal_df = pd.read_csv(calibration_file, sep=",")
     cal_df['modifications'] = cal_df['modifications'].fillna("")
 
@@ -20,7 +21,12 @@ if __name__ == "__main__":
 
     # Initiate a DeepLC instance that will perform the calibration and predictions
     dlc = DeepLC(
-        path_model=["full_hc_fraction_df_0196_woo_1fd8363d9af9dcad3be7553c39396960.hdf5"],
+        path_model=[
+            "full_hc_d0196_fraction_1fd8363d9af9dcad3be7553c39396960.hdf5",
+            "full_hc_d0196_fraction_8c22d89667368f2f02ad996469ba157e.hdf5",
+            "full_hc_d0196_fraction_cb975cfdd4105f97efa0b3afffe075cc.hdf5",
+        ],
+
         cnn_model=True,
         f_extractor=FeatExtractor(
             add_sum_feat=False,

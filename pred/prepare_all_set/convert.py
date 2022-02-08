@@ -187,7 +187,7 @@ for f in fragments:
 
 
 
-outputfile = open("../../delivery/human_library.csv", "w")
+outputfile = open("../human_library.csv", "w")
 outputfile.write("seq,modifications\n")
 for l in sorted(outputlines):
     outputfile.write(l)
