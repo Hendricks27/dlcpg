@@ -181,18 +181,18 @@ for f in fragments:
                 continue
 
             l = [f, "|".join(modstr_almost), "%0.2f" % newmass]
-            outputlines.append(",".join(l) + "\n")
-
-
-
+            outputlines.append(l)
 
 
 outputfile = open("../human_library.csv", "w")
 outputfile.write("seq,modifications\n")
 for l in sorted(outputlines):
-    outputfile.write(l)
+    outputfile.write(",".join(l[:2]) + "\n")
 
-
+outputfile = open("../tmp/human_library_w_mass.csv", "w")
+outputfile.write("seq,modifications,mw\n")
+for l in sorted(outputlines):
+    outputfile.write(",".join(l) + "\n")
 
 
 

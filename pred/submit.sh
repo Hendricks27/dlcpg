@@ -15,7 +15,7 @@
 
 
 python3.7 prediction_rt.py
-# python3.7 prediction_fr.py
+python3.7 prediction_fr.py
 
 
 
