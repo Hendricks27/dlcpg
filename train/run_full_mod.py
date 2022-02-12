@@ -42,7 +42,7 @@ session = InteractiveSession(config=config)
 
 def run():
 
-    a_blocks = [2, 3] # Original value is 3. But 2 is perhaps better
+    a_blocks = [3] # Original value is 3. But 2 is perhaps better
     a_kernel = [2, 4, 8]
     a_max_pool = [2]
     a_filters_start = [256]
@@ -93,9 +93,10 @@ def run():
     hc_str = "_hc"
 
     datasets = [
-        "d0196_retention",
-        "d0196_fraction",
-        # "tinytest"
+        "f25_retention",
+        "f25_fraction",
+        # "f96_retention",
+        # "f96_fraction",
     ]
     for dataset_name in datasets:
         df = cnn_functions.read_infile("datasets/%s.csv" % (dataset_name))
@@ -107,8 +108,6 @@ def run():
             correction_factor = (df["tr"].max())/10.0 #*0.05
         else:
             correction_factor = 1.0
-
-        # TODO K-FORD cross validation
 
         df_train,df_test = cnn_functions.train_test(df,ratio_train=ratio_test)
         df_train,df_valid = cnn_functions.train_test(df_train,ratio_train=ratio_valid)

@@ -229,17 +229,24 @@ import sys
 223 MS/MS Count
 224 Taxonomy IDs"""
 
-outputxxxx = open("df0196.csv", "w")
+
+
+input_file_path = "./20211130_fraction1-96/txt/modificationSpecificPeptides.txt"
+out_file_path = "df0196.csv"
+
+
+outputxxxx = open(out_file_path, "w")
 
 def tocorrectorder(l):
     res = [None] * 96
     convert_index = [0, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 1, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 2, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 3, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 4, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 5, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 6, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 7, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 8, 89, 90, 91, 92, 93, 94, 95]
+
     for i, entry in enumerate(l):
         res[convert_index[i]] = entry
     assert None not in res
     return res
 
-with open("./20211130_fraction1-96/txt/modificationSpecificPeptides.txt") as f:
+with open(input_file_path) as f:
     i = 0
     for l in f:
         i += 1
@@ -260,6 +267,7 @@ with open("./20211130_fraction1-96/txt/modificationSpecificPeptides.txt") as f:
         seq = l[0]
         mod = l[1]
         oxi = l[11]
+        mw = l[2]
 
         rt = float(l[109])
 
@@ -313,7 +321,7 @@ with open("./20211130_fraction1-96/txt/modificationSpecificPeptides.txt") as f:
 
             fraction = wfr2
 
-        line = [seq, mod, oxi, rt, fraction]
+        line = [seq, mod, mw, oxi, rt, fraction]
 
         outputxxxx.write("\t".join(map(str, line)) + "\n")
 

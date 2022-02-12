@@ -1,13 +1,14 @@
 import os
 import sys
 
-input_file = open("df0196.csv")
+dname = ["f96", "f25"][1]
+input_file = open("%s.csv" % dname)
 
 lines_rt = []
 lines_fr = []
 for l in input_file:
 
-    seq, modtmp, oxinum, rt, fr = l.strip().split("\t")
+    seq, modtmp, mw, oxinum, rt, fr = l.strip().split("\t")
     # print(seq, modtmp, oxinum, rt, fr)
 
     newmod = ""
@@ -55,12 +56,12 @@ for l in input_file:
 lines_rt.sort()
 lines_fr.sort()
 
-output_file = open("../d0196_fraction.csv", "w")
+output_file = open("../%s_fraction.csv" % dname, "w")
 output_file.write("seq,modifications,tr\n")
 for l in lines_fr:
     output_file.write(l + "\n")
 
-output_file = open("../d0196_retention.csv", "w")
+output_file = open("../%s_retention.csv" % dname, "w")
 output_file.write("seq,modifications,tr\n")
 for l in lines_rt:
     output_file.write(l + "\n")
