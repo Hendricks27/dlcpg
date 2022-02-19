@@ -11,9 +11,10 @@ class RTFR():
 
     def __init__(self, dbp):
         # Confidence interval 99%
-        self._mw_range = 2
-        self._rt_range = 20
-        self._fr_range = 6
+        # mw range 10ppm
+        self._mw_range = 4600 * 10 / pow(10, 6)
+        self._rt_range = 11
+        self._fr_range = 5
 
         self.connection = None
         self.cursor = None
@@ -35,11 +36,8 @@ class RTFR():
         i = 0
         csv = open(file_path)
         for l in csv:
-            if i == 0:
-                i += 1
-                continue
-            seq, mod, d = l.strip().split(",")
-            self.add_data_single((seq, mod, float(d), self.random_real(15, 125), self.random_real(2, 97)))
+            seq, mod, mw, rt, fr = l.strip().split("\t")
+            self.add_data_single((seq, mod, float(mw), float(rt), float(fr)))
         self.commit()
         csv.close()
         return
@@ -85,34 +83,8 @@ class RTFR():
             yield row
 
 
-
-
-# loc = ":memory:"
-loc = "test2.db"
-rtfr = RTFR(loc)
-
-if True:
-    rtfr.add_csv("human_library.csv")
-    rtfr.create_index()
-
-
-
-for i in range(1000):
-    ts = time.time()
-
-    alllines = 3717909
-
-    rt = rtfr.random_real(20, 115)
-    mw = rtfr.random_real(400, 4200)
-    fr = rtfr.random_real(3, 96)
-    res = list(rtfr.query(mw, rt, fr))
-
-    duration = time.time() - ts
-
-    line = "\t".join(map(str, [len(res), alllines, "%0.3f P" % (len(res)/alllines*100), "%0.2f ms" % (duration*1000)]))
-
-    print(line)
-
+if __name__ == "__main__":
+    print("hello")
 
 
 

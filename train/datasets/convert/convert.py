@@ -4,12 +4,17 @@ import sys
 dname = ["f96", "f25"][1]
 input_file = open("%s.csv" % dname)
 
+frd = {}
 lines_rt = []
 lines_fr = []
 for l in input_file:
 
     seq, modtmp, mw, oxinum, rt, fr = l.strip().split("\t")
     # print(seq, modtmp, oxinum, rt, fr)
+    fri = int(float(fr))
+    if fri not in frd:
+        frd[fri] = 0
+    frd[fri]+=1
 
     newmod = ""
     oxi = False
@@ -50,7 +55,8 @@ for l in input_file:
     lines_fr.append(",".join([seq, newmod, fr]))
 
 
-
+for k in sorted(frd.keys()):
+    print(k, frd[k])
 
 
 lines_rt.sort()

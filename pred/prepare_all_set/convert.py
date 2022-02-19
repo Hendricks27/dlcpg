@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 import itertools
 
 
@@ -85,8 +86,18 @@ def fasta(f):
 
     return data
 
+def mprocess(fasta_dict):
+    res = copy.deepcopy(fasta_dict)
+    for title, seq in fasta_dict.items():
+        if seq.startswith("M"):
+            newt = title + "_M_removed_xxxxxx"
+            assert newt not in res
+            res[newt] = seq[1:]
+    return res
+
 
 proteins = fasta("Human_sp_iso_2019-08-27.fasta")
+proteins = mprocess(proteins)
 print(i, len(proteins))
 
 
