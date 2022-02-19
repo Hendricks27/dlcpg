@@ -4,7 +4,18 @@ import time
 import json
 import pandas as pd
 from deeplc import DeepLC, FeatExtractor
-from prediction_data import calibration_file_path, model_path, data_name
+
+
+
+
+data_name = "f96_retention"
+calibration_file_path = "./dataset/f96_retention.csv"
+model_path = [
+    "full_hc_d0196_retention_1fd8363d9af9dcad3be7553c39396960.hdf5",
+    "full_hc_d0196_retention_8c22d89667368f2f02ad996469ba157e.hdf5",
+    "full_hc_d0196_retention_cb975cfdd4105f97efa0b3afffe075cc.hdf5",
+]
+
 
 
 if __name__ == "__main__":

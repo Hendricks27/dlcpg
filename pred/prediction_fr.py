@@ -4,7 +4,16 @@ import time
 import json
 import pandas as pd
 from deeplc import DeepLC, FeatExtractor
-from prediction_data import calibration_file_path, model_path, data_name
+
+
+
+data_name = "f96_fraction"
+calibration_file_path = "./dataset/f96_fraction.csv"
+model_path = [
+    "full_hc_d0196_fraction_1fd8363d9af9dcad3be7553c39396960.hdf5",
+    "full_hc_d0196_fraction_8c22d89667368f2f02ad996469ba157e.hdf5",
+    "full_hc_d0196_fraction_cb975cfdd4105f97efa0b3afffe075cc.hdf5",
+]
 
 
 if __name__ == "__main__":
