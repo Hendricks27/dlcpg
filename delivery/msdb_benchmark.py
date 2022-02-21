@@ -13,12 +13,12 @@ from msdb import RTFR
 loc = "test2.db"
 rtfr = RTFR(loc)
 
-if False:
+if True:
     rtfr.add_csv("pred.csv")
     rtfr.create_index()
 
 
-
+sys.exit(3)
 for i in range(1000):
     ts = time.time()
 

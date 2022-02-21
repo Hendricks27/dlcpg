@@ -46,6 +46,10 @@ class RTFR():
         self.cursor.execute("CREATE INDEX ind ON info(mw, rt, fr)")
         self.commit()
 
+    def create_index_mw(self):
+        self.cursor.execute("CREATE INDEX indmw ON info(mw)")
+        self.commit()
+
     def add_data_single(self, d):
         self.cursor.execute("INSERT INTO info VALUES %s" % (d, ))
 
@@ -74,7 +78,7 @@ class RTFR():
         q = """
         SELECT seq, mods, mw, rt, fr
         FROM info
-        WHERE mw BETWEEN %0.2f AND %0.2f
+        WHERE mw BETWEEN %0.4f AND %0.4f
         AND rt BETWEEN %0.2f AND %0.2f
         AND fr BETWEEN %0.2f AND %0.2f
         """ % (mw_start, mw_end, rt_start, rt_end, fr_start, fr_end)
@@ -82,9 +86,24 @@ class RTFR():
         for row in self.cursor.execute(q):
             yield row
 
+    def query_mass(self, mw, rt, fr):
+        mw_start = mw - self._mw_range
+        mw_end   = mw + self._mw_range
+
+        q = """
+        SELECT seq, mods, mw, rt, fr
+        FROM info
+        WHERE mw BETWEEN %0.4f AND %0.4f
+        """ % (mw_start, mw_end)
+
+        for row in self.cursor.execute(q):
+            yield row
 
 if __name__ == "__main__":
-    print("hello")
+    rtfr = RTFR("test2.db")
+    rtfr.add_csv("pred.csv")
+    rtfr.create_index()
+    # rtfr.create_index_mw()
 
 
 

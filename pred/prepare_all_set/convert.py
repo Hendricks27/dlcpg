@@ -104,14 +104,12 @@ print(i, len(proteins))
 fragments = set()
 fragments_acetyl = set()
 
-# TODO what do we do for "X" ?
-allseq = proteins.values()
-allseq = set(filter(lambda x: "X" not in x, allseq))
-del proteins
+fragment_prid_f = open("fragments_lookup.tsv", "w")
 
-# DEBUG allseq = ["HSFJKHAJKFSHJKFSAHJKCHSJKCAJSJRWKJEKDLSJKRNWKENKLWQNDQLKFNK"]
-for s in allseq:
-    #print(s)
+
+for title, s in proteins.items():
+
+    prid = title.split("|")[1]
 
     # Cleave at Lysine(Lys, K) and Arginine (Arg, R)
     csite = [-1]
@@ -134,21 +132,23 @@ for s in allseq:
                 continue
             #print(" "*(cs1+1) + frag)
             fragments.add(frag)
+            fragment_prid_f.write("\t".join([prid, frag]) + "\n")
 
             if cs1 == -1:
                 fragments_acetyl.add(frag)
 
+fragment_prid_f.close()
 
 
-
-print(len(allseq))
 print(len(fragments))
-
-del allseq
 
 
 outputlines = []
 for f in fragments:
+
+    if "X" in f:
+        continue
+
     possible_mods = []
     # debug_print(f)
 
